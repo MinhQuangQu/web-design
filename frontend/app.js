@@ -8,8 +8,8 @@ const moneyFormatter = new Intl.NumberFormat('vi-VN', { style: 'currency', curre
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
-  errorMessage.classList.remove('visible');
-  result.classList.remove('visible');
+  errorMessage.hidden = true;
+  result.hidden = true;
   button.disabled = true;
   button.textContent = 'Đang tính toán...';
 
@@ -20,17 +20,16 @@ form.addEventListener('submit', async (event) => {
   });
 
   try {
-    // Relative URL works because the frontend and API share the same origin.
     const response = await fetch(`/predict?${params.toString()}`);
     if (!response.ok) throw new Error(`API returned ${response.status}`);
     const data = await response.json();
 
     price.textContent = moneyFormatter.format(data.predicted_price);
     resultDetail.textContent = `${data.area} m² · ${data.bedrooms} phòng ngủ · ${data.location}`;
-    result.classList.add('visible');
+    result.hidden = false;
   } catch (error) {
-    errorMessage.textContent = 'Không thể lấy kết quả lúc này. Hãy kiểm tra API và thử lại.';
-    errorMessage.classList.add('visible');
+    errorMessage.textContent = 'Error. Try again.';
+    errorMessage.hidden = false;
   } finally {
     button.disabled = false;
     button.textContent = 'Ước tính giá nhà';

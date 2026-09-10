@@ -3,68 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Ước tính giá nhà bằng API dự đoán giá nhà." />
-  <title>HousePrice — Ước tính giá nhà</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>House price prediction</title>
 </head>
 <body>
-  <div class="shell">
-    <header>
-      <div class="brand">
-        <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/></svg>
-        </span>
-        <span>HousePrice</span>
-      </div>
-      <span class="status">Mini prediction API</span>
-    </header>
+  <h1>House price prediction</h1>
 
-    <main>
-      <section class="intro" aria-labelledby="page-title">
-        <p class="eyebrow">Ước tính nhanh · Việt Nam</p>
-        <h1>Biết giá trị căn nhà của bạn.</h1>
-        <p>Nhập một vài thông tin cơ bản để nhận mức giá tham khảo được tính toán ngay lập tức.</p>
-      </section>
+  <form id="prediction-form">
+    <p>
+      <label for="area">Area (m²)</label><br />
+      <input id="area" name="area" type="number" min="1" step="0.1" required />
+    </p>
+    <p>
+      <label for="bedrooms">Bedrooms</label><br />
+      <input id="bedrooms" name="bedrooms" type="number" min="0" step="1" max="2" required />
+    </p>
+    <p>
+      <label for="location">Location</label><br />
+      <input id="location" name="location" type="text" placeholder="hanoi, hcmc hoặc other" required />
+    </p>
+    <button id="submit-button" type="submit">Submit</button>
+    <p id="error-message" role="alert" hidden></p>
+  </form>
 
-      <section class="card" aria-labelledby="form-title">
-        <h2 id="form-title">Thông tin căn nhà</h2>
-        <p class="card-intro">Các trường có dấu <span aria-hidden="true">*</span> là bắt buộc.</p>
-        <form id="prediction-form">
-          <div class="field">
-            <label for="area">Diện tích <span aria-hidden="true">*</span></label>
-            <div class="input-wrap">
-              <input class="has-unit" id="area" name="area" type="number" min="1" step="0.1" placeholder="Ví dụ: 80" required />
-              <span class="unit">m²</span>
-            </div>
-          </div>
-
-          <div class="grid">
-            <div class="field">
-              <label for="bedrooms">Số phòng ngủ <span aria-hidden="true">*</span></label>
-              <input id="bedrooms" name="bedrooms" type="number" min="0" step="1" placeholder="Ví dụ: 3" required />
-            </div>
-            <div class="field">
-              <label for="location">Khu vực</label>
-              <select id="location" name="location">
-                <option value="other">Khác</option>
-                <option value="hanoi">Hà Nội</option>
-                <option value="hcmc">TP. Hồ Chí Minh</option>
-              </select>
-            </div>
-          </div>
-
-          <button id="submit-button" type="submit">Ước tính giá nhà</button>
-          <p id="error-message" class="error" role="alert"></p>
-        </form>
-
-        <div id="result" class="result" aria-live="polite">
-          <div class="result-label">Giá dự đoán</div>
-          <div id="price" class="price">—</div>
-          <p id="result-detail" class="result-detail"></p>
-        </div>
-      </section>
-    </main>
-  </div>
+  <section id="result" aria-live="polite" hidden>
+    <h2>Result</h2>
+    <p id="price"></p>
+    <p id="result-detail"></p>
+  </section>
 
   <script src="app.js"></script>
 </body>
