@@ -6,7 +6,7 @@ From the project root:
 
 ```bash
 cd backend
-uvicorn main:app --reload
+python -m uvicorn main:app --reload
 ```
 
 Open the frontend at http://127.0.0.1:8000/static/house_form.html. The API docs are at http://127.0.0.1:8000/docs.

@@ -1,67 +1,66 @@
-from pathlib import Path
-import asyncio
-
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+
 
 app = FastAPI()
 
-FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+
+class Item(BaseModel):
+    name: str
+    price: int
+    in_stock: bool = True
+
+
+class ItemResponse(Item):
+    id: int
+
+
+items: dict[int, ItemResponse] = {}
+next_id = 1
+
 
 @app.get("/")
 def read_root():
-    return FileResponse(FRONTEND_DIR / "house_form.html")
-
-@app.get('/hello/{name}')
-def hello(name: str):
-    return {"Greeting": f"Hello {name}"}
-
-@app.get("/add")
-async def add(a: int, b: int):
-    await asyncio.sleep(3)      # delay
-    return {"a": a, "b": b, "sum": a + b}
+    return {"message": "Item API is running"}
 
 
-def predict_price(area: float, bedrooms: int, location: str) -> float:
-    """Return the estimated house price in VND, rounded to the nearest million."""
-    total_price = 500_000_000 + (15_000_000 * area) + (50_000_000 * bedrooms)
-    normalized_location = location.strip().lower()
-
-    if normalized_location == "hanoi":
-        total_price *= 1.3
-    elif normalized_location == "hcmc":
-        total_price *= 1.25
-
-    return float(int(total_price / 1_000_000 + 0.5) * 1_000_000)
+@app.get("/items", response_model=list[ItemResponse])
+def get_items():
+    return list(items.values())
 
 
-# This endpoint is synchronous because the calculation is plain CPU work with no I/O to await.
-@app.get("/predict")
-def predict_endpoint(area: float, bedrooms: int, location: str = "other"):
-    return {
-        "predicted_price": predict_price(area, bedrooms, location),
-        "area": area,
-        "bedrooms": bedrooms,
-        "location": location,
-    }
+@app.get("/items/{item_id}", response_model=ItemResponse)
+def get_item(item_id: int):
+    item = items.get(item_id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return item
 
 
-class HouseInput(BaseModel):
-    area: float
-    bedrooms: int
-    location: str = "other"
+@app.post("/items", response_model=ItemResponse, status_code=201)
+def create_item(data: Item):
+    global next_id
+
+    item = ItemResponse(id=next_id, **data.model_dump())
+    items[next_id] = item
+    next_id += 1
+    return item
 
 
-@app.post("/predict")
-def predict_from_body(house: HouseInput):
-    return {
-        "predicted_price": predict_price(house.area, house.bedrooms, house.location),
-        "area": house.area,
-        "bedrooms": house.bedrooms,
-        "location": house.location,
-    }
+@app.put("/items/{item_id}", response_model=ItemResponse)
+def update_item(item_id: int, data: Item):
+    if item_id not in items:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    item = ItemResponse(id=item_id, **data.model_dump())
+    items[item_id] = item
+    return item
 
 
-app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+@app.delete("/items/{item_id}")
+def delete_item(item_id: int):
+    if item_id not in items:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    del items[item_id]
+    return {"message": "Item deleted"}
